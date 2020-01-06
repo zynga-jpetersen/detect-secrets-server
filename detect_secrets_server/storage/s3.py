@@ -51,22 +51,24 @@ class S3Storage(FileStorage):
             Prefix=self.prefix,
         )
         for page in pages:
-            for obj in page['Contents']:
-                filename = os.path.splitext(obj['Key'][len(self.prefix):])[0]
-                if filename.startswith('/'):
-                    filename = filename[1:]
+            contents = page.get('Contents')
+            if contents:
+                for obj in contents:
+                    filename = os.path.splitext(obj['Key'][len(self.prefix):])[0]
+                    if filename.startswith('/'):
+                        filename = filename[1:]
 
-                yield (
-                    self.get(filename, force_download=False),
+                    yield (
+                        self.get(filename, force_download=False),
 
-                    # TODO: In it's current state, you can't distinguish the
-                    #       difference between S3StorageWithLocalGit and S3Storage,
-                    #       because there's no separate paths in S3.
-                    #
-                    #       Therefore, return None so that the results will be
-                    #       displayed irregardless of the user's `--local` flag.
-                    None,
-                )
+                        # TODO: In it's current state, you can't distinguish the
+                        #       difference between S3StorageWithLocalGit and S3Storage,
+                        #       because there's no separate paths in S3.
+                        #
+                        #       Therefore, return None so that the results will be
+                        #       displayed irregardless of the user's `--local` flag.
+                        None,
+                    )
 
     def upload(self, key, value):
         """This is different than `put`, to support situations where you
